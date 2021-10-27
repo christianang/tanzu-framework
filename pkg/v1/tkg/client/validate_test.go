@@ -60,6 +60,7 @@ var _ = Describe("Validate", func() {
 			initRegionOptions     *client.InitRegionOptions
 			tkgClient             *client.TkgClient
 			tkgConfigReaderWriter tkgconfigreaderwriter.TKGConfigReaderWriter
+			featuresClient        *fakes.FeaturesClient
 		)
 
 		BeforeEach(func() {
@@ -91,11 +92,13 @@ var _ = Describe("Validate", func() {
 				return providerName, nil
 			}
 
+			featuresClient = &fakes.FeaturesClient{}
 			options := client.Options{
 				ReaderWriterConfigClient: readerWriter,
 				TKGConfigUpdater:         tkgConfigUpdater,
 				TKGBomClient:             tkgBomClient,
 				RegionManager:            new(fakes.RegionManager),
+				FeaturesClient:           featuresClient,
 			}
 			tkgClient, err = client.New(options)
 			Expect(err).NotTo(HaveOccurred())
@@ -530,6 +533,15 @@ var _ = Describe("Validate", func() {
 					tkgConfigReaderWriter.Set(constants.ConfigVariableIPFamily, "ipv4,ipv6")
 				})
 
+				FContext("when dual-stack-primary-ipv4 feature gate is false", func() {
+					It("returns an error", func() {
+						featuresClient.IsFeatureFlagEnabledReturns(false, nil)
+
+						validationError := tkgClient.ConfigureAndValidateManagementClusterConfiguration(initRegionOptions, true)
+						Expect(validationError).To(HaveOccurred())
+						Expect(validationError.Error()).To(ContainSubstring("TKG_IP_FAMILY is set to \"ipv4,ipv6\", but management-cluster.dual-stack-primary-ipv4 feature is not enabled"))
+					})
+				})
 				Context("when SERVICE_CIDR and CLUSTER_CIDR are ipv4,ipv6", func() {
 					It("should pass validation", func() {
 						tkgConfigReaderWriter.Set(constants.ConfigVariableServiceCIDR, "1.2.3.4/16,::1/8")

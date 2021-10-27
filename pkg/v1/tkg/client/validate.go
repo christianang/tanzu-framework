@@ -1573,6 +1573,17 @@ func (c *TkgClient) configureAndValidateIPFamilyConfiguration() error {
 		ipFamily = constants.IPv4Family
 	}
 
+	// clusterRole, _ := c.TKGConfigReaderWriter().Get(constants.ConfigVariableClusterRole)
+	// checkFeatureFlags(clusterRole)
+
+	// Read from ClientConfig map feature status
+	// config.GetConfig()
+
+	dualIPv4PrimaryEnabled, _ := c.IsFeatureFlagEnabled("managment-cluster.dual-stack-ipv4-primary")
+	if !dualIPv4PrimaryEnabled && ipFamily == constants.DualStackPrimaryIPv4Family {
+		return fmt.Errorf("TKG_IP_FAMILY is set to %q, but managment-cluster.dual-stack-ipv4-primary feature is not enabled", ipFamily)
+	}
+
 	serviceCIDRs, _ := c.TKGConfigReaderWriter().Get(constants.ConfigVariableServiceCIDR)
 	clusterCIDRs, _ := c.TKGConfigReaderWriter().Get(constants.ConfigVariableClusterCIDR)
 

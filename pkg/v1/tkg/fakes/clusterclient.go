@@ -5,19 +5,18 @@ import (
 	"sync"
 	"time"
 
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-	v1alpha3a "sigs.k8s.io/cluster-api/api/v1alpha3"
-	v1alpha3b "sigs.k8s.io/cluster-api/cmd/clusterctl/api/v1alpha3"
-	"sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1alpha3"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/vmware-tanzu/tanzu-framework/apis/run/v1alpha1"
 	"github.com/vmware-tanzu/tanzu-framework/apis/run/v1alpha2"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/azure"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/clusterclient"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/tkgconfigbom"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/vc"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	v1alpha3a "sigs.k8s.io/cluster-api/api/v1alpha3"
+	v1alpha3b "sigs.k8s.io/cluster-api/cmd/clusterctl/api/v1alpha3"
+	"sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1alpha3"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ClusterClient struct {
@@ -2711,15 +2710,16 @@ func (fake *ClusterClient) GetPacificClusterObject(arg1 string, arg2 string) (*v
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.GetPacificClusterObjectStub
+	fakeReturns := fake.getPacificClusterObjectReturns
 	fake.recordInvocation("GetPacificClusterObject", []interface{}{arg1, arg2})
 	fake.getPacificClusterObjectMutex.Unlock()
-	if fake.GetPacificClusterObjectStub != nil {
-		return fake.GetPacificClusterObjectStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	fakeReturns := fake.getPacificClusterObjectReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 

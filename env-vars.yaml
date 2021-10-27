@@ -1,0 +1,2 @@
+CLUSTER_PLAN: dev
+TKG_IP_FAMILY: "ipv4,ipv6"

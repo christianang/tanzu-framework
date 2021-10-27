@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/skratchdot/open-golang/open"
 
+	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/config"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/client"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/constants"
 	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/log"
@@ -143,6 +144,26 @@ func (t *tkgctl) Init(options InitRegionOptions) error {
 					return errors.Wrap(validateErr, "configuration validation failed")
 				}
 			}
+		}
+
+		// ignoring error because IPFamily is an optional configuration
+		// if not set Get will return an empty string
+		ipFamily, _ := t.tkgClient.TKGConfigReaderWriter().Get(constants.ConfigVariableIPFamily)
+		if ipFamily == "" {
+			ipFamily = constants.IPv4Family
+		}
+
+		cfg, _ := config.GetClientConfig()
+		dualStackIPv4PrimaryEnabled := false
+
+		if features, ok := cfg.ClientOptions.Features["management-cluster"]; ok {
+			if features["dual-stack-ipv4-primary"] == "true" {
+				dualStackIPv4PrimaryEnabled = true
+			}
+		}
+
+		if !dualStackIPv4PrimaryEnabled && ipFamily == "ipv4,ipv6" {
+			return fmt.Errorf("feature is not enabled")
 		}
 
 		validateErr := t.tkgClient.ConfigureAndValidateManagementClusterConfiguration(&optionsIR, false)

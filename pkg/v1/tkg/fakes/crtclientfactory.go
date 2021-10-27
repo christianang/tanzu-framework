@@ -4,10 +4,9 @@ package fakes
 import (
 	"sync"
 
+	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/clusterclient"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/clusterclient"
 )
 
 type CrtClientFactory struct {

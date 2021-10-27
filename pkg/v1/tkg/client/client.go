@@ -201,6 +201,8 @@ type Client interface {
 	IsPacificRegionalCluster() (bool, error)
 	// GetPacificClusterObject gets Pacific cluster object
 	GetPacificClusterObject(clusterName, namespace string) (*tkgsv1alpha2.TanzuKubernetesCluster, error)
+	// IsFeatureFlagEnabled checks if the provided flag has value of "true"
+	IsFeatureFlagEnabled(string) (bool, error)
 }
 
 // TkgClient implements Client.

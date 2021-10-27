@@ -718,6 +718,10 @@ func (c *TkgClient) SaveFeatureFlags(featureFlags map[string]string) error {
 	return nil
 }
 
+func (c *TkgClient) IsFeatureFlagEnabled(flagName string) (bool, error) {
+	return true, nil
+}
+
 // safelyAddFeatureFlag adds an entry to the feature flag map and handles if map is nil
 func (c *TkgClient) safelyAddFeatureFlag(featureFlags map[string]string, feature, value string) map[string]string {
 	if featureFlags != nil {

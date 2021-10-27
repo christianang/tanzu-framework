@@ -40,6 +40,7 @@ YTT := $(BIN_DIR)/ytt
 KUBEVAL := $(BIN_DIR)/kubeval
 GOBINDATA := $(BIN_DIR)/gobindata
 VALE := $(BIN_DIR)/vale
+COUNTERFEITER := $(BIN_DIR)/counterfeiter
 
 ## --------------------------------------
 ## Help
@@ -57,7 +58,7 @@ $(GINKGO): go.mod
 	mkdir -p $(BIN_DIR)
 	go build -tags=tools -o $(BIN_DIR)/ginkgo github.com/onsi/ginkgo/ginkgo
 
-COUNTERFEITER := $(BIN_DIR)/counterfeiter
+counterfeiter: $(COUNTERFEITER)
 $(COUNTERFEITER): $(BIN_DIR) go.mod go.sum
 	go build -tags=tools -o $@ github.com/maxbrunsfeld/counterfeiter/v6
 
