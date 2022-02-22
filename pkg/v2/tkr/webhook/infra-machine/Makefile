@@ -43,7 +43,11 @@ docker-publish: ## Publish docker image
 
 .PHONY: kbld-image-replace
 kbld-image-replace: ## Add newImage in kbld-config.yaml
-	cd ../../../../../hack/packages/kbld-image-replace && $(MAKE) run IMAGE=$(IMG_DEFAULT_NAME_TAG) NEW_IMAGE=$(IMG)
+	cd ../../../../../hack/packages/kbld-image-replace && \
+	  go run main.go -kbld-config ../../../packages/management/tkr-aws-machine-webhook/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG) && \
+	  go run main.go -kbld-config ../../../packages/management/tkr-azure-machine-webhook/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG) && \
+	  go run main.go -kbld-config ../../../packages/management/tkr-docker-machine-webhook/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG) && \
+	  go run main.go -kbld-config ../../../packages/management/tkr-vsphere-machine-webhook/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG)
 
 .PHONY: docker-image-names
 docker-image-names:

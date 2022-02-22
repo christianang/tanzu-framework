@@ -95,10 +95,16 @@ func generateSingleImgpkgLockOutput(projectRootDir, toolsBinDir, packagePath str
 	yttCmd := exec.Command(filepath.Join(toolsBinDir, "ytt"),
 		"--ignore-unknown-comments",
 		"-f", filepath.Join(packagePath, "bundle", "config")) // #nosec G204
-	kbldCmd := exec.Command(filepath.Join(toolsBinDir, "kbld"),
+
+	kbldArgs := []string{
 		"-f", "-",
-		"-f", filepath.Join(projectRootDir, constants.KbldConfigFilePath),
-		"--imgpkg-lock-output", filepath.Join(imgpkgLockOutputDir, "images.yml")) // #nosec G204
+		"--imgpkg-lock-output", filepath.Join(imgpkgLockOutputDir, "images.yml"),
+	}
+	if _, err := os.Stat(filepath.Join(packagePath, "kbld-config.yaml")); err == nil {
+		kbldArgs = append(kbldArgs, "-f", filepath.Join(packagePath, "kbld-config.yaml"))
+	}
+
+	kbldCmd := exec.Command(filepath.Join(toolsBinDir, "kbld"), kbldArgs...) // #nosec G204
 
 	pipe, err := yttCmd.StdoutPipe()
 	if err != nil {

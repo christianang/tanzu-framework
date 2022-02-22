@@ -263,6 +263,10 @@ build-cli-with-oci-discovery: ${CLI_ADMIN_JOBS_OCI_DISCOVERY} ${CLI_JOBS_OCI_DIS
 build-cli-with-local-discovery: ${CLI_ADMIN_JOBS_LOCAL_DISCOVERY} ${CLI_JOBS_LOCAL_DISCOVERY} publish-plugins-all-local publish-admin-plugins-all-local ## Build Tanzu CLI with Local standalone discovery
 	@rm -rf pinniped
 
+.PHONY: build-cli-with-local-discovery
+build-cli-plugins-for-core-management-package: ${CLI_JOBS_LOCAL_DISCOVERY}
+	@rm -rf pinniped
+
 .PHONY: build-plugin-admin-with-oci-discovery
 build-plugin-admin-with-oci-discovery: ${CLI_ADMIN_JOBS_OCI_DISCOVERY} publish-admin-plugins-all-oci ## Build Tanzu CLI admin plugins with OCI standalone discovery
 
@@ -729,7 +733,7 @@ prep-package-tools:
 	cd hack/packages/package-tools && $(GO) mod tidy
 
 .PHONY: package-bundle
-package-bundle: tools prep-package-tools ## Build one specific tar bundle package, needs PACKAGE_NAME VERSION
+package-bundle: $(IMGPKG) prep-package-tools ## Build one specific tar bundle package, needs PACKAGE_NAME VERSION
 	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate $(PACKAGE_NAME) --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION)
 
 .PHONY: package-bundles
@@ -737,11 +741,11 @@ package-bundles: tools prep-package-tools ## Build tar bundles for multiple pack
 	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate --all --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION)
 
 .PHONY: package-repo-bundle
-package-repo-bundle: tools prep-package-tools ## Build tar bundles for package repo with given package-values.yaml file
+package-repo-bundle: $(YQ) $(YTT) $(KBLD) $(IMGPKG) prep-package-tools ## Build tar bundles for package repo with given package-values.yaml file
 	cd hack/packages/package-tools && $(GO) run main.go repo-bundle generate --repository=$(PACKAGE_REPOSITORY) --registry=$(OCI_REGISTRY) --version=$(REPO_BUNDLE_VERSION) --package-values-file=$(PACKAGE_VALUES_FILE) --sub-version=$(REPO_BUNDLE_SUB_VERSION)
 
 .PHONY: push-package-bundles
-push-package-bundles: tools prep-package-tools ## Push specified package bundle(s) in a package repository.
+push-package-bundles: $(IMGPKG) prep-package-tools ## Push specified package bundle(s) in a package repository.
 ## Specified package bundles must be set to the PACKAGE_BUNDLES environment variable as comma-separated values
 ## and must not contain spaces. Example: PACKAGE_BUNDLES=featuregates,core-management-plugins
 	cd hack/packages/package-tools && $(GO) run main.go package-bundle push $(PACKAGE_BUNDLES) --repository=$(PACKAGE_REPOSITORY) --registry=$(OCI_REGISTRY) --version=$(BUILD_VERSION) --sub-version=$(PACKAGE_SUB_VERSION)
@@ -751,7 +755,7 @@ push-all-package-bundles: tools prep-package-tools ## Push all package bundles i
 	cd hack/packages/package-tools && $(GO) run main.go package-bundle push --repository=$(PACKAGE_REPOSITORY) --registry=$(OCI_REGISTRY) --version=$(BUILD_VERSION) --sub-version=$(PACKAGE_SUB_VERSION) --all
 
 .PHONY: push-package-repo-bundle
-push-package-repo-bundle: tools prep-package-tools ## Push package repo bundles
+push-package-repo-bundle: $(YQ) $(YTT) $(KBLD) $(IMGPKG) prep-package-tools ## Push package repo bundles
 	cd hack/packages/package-tools && $(GO) run main.go repo-bundle push --repository=$(PACKAGE_REPOSITORY) --registry=$(OCI_REGISTRY) --version=$(REPO_BUNDLE_VERSION)
 
 .PHONY: package-vendir-sync
@@ -773,3 +777,36 @@ trivy-scan: ## Trivy scan images used in packages
 
 .PHONY: package-push-bundles-repo ## Performs build and publishes packages and repo bundles
 package-push-bundles-repo: package-bundles push-package-bundles package-repo-bundle push-package-repo-bundles
+
+package-bundle-tooling:
+	docker build -t package-bundle-tooling:latest -f build-tooling/package-bundles/Dockerfile .
+
+.PHONY: build-package-dind
+build-package-dind: package-bundle-tooling ## Build package bundles
+	docker run \
+	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+	-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+	-e PACKAGE_PATH=${PACKAGE_PATH} \
+	-e OCI_REGISTRY=${OCI_REGISTRY} \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v $(PWD):/tanzu-framework \
+	--net=host \
+	package-bundle-tooling:latest;
+
+package-repo-bundle-tooling:
+	docker build -t package-repo-bundle-tooling:latest -f build-tooling/package-repository-bundles/Dockerfile .
+
+.PHONY: build-package-repo-bundle-dind
+build-package-repo-bundle-dind: package-repo-bundle-tooling ## Build package repo bundle
+	docker run \
+	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+	-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+	-e OCI_REGISTRY=${OCI_REGISTRY} \
+	-e PACKAGE_REPOSITORY=${PACKAGE_REPOSITORY} \
+	-e PACKAGE_VALUES_FILE=${PACKAGE_VALUES_FILE} \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v $(PWD):/tanzu-framework \
+	--net=host \
+	package-repo-bundle-tooling:latest;

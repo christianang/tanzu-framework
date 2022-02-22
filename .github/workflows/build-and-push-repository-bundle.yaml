@@ -1,0 +1,98 @@
+name: Build TKG repository bundle
+on: [push]
+jobs:
+  discover-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Matrix
+        id: set-matrix
+        run: |
+          make -C hack/tools yq
+          matrix=$(hack/tools/bin/yq e -j -I=0 '.repositories.management.packages.[] | {"package-name": .name, "package-path": .path} | [.] | {"include": .}' packages/package-values.yaml)
+          echo "::set-output name=matrix::${matrix}"
+
+  check-packages:
+    runs-on: ubuntu-latest
+    needs: discover-packages
+    steps:
+      - name: Check list of packages
+        run: |
+          matrix='${{ needs.discover-packages.outputs.matrix }}'
+          echo $matrix | jq .
+
+  build-packages:
+    runs-on: ubuntu-latest
+    needs: discover-packages
+    strategy:
+      matrix: ${{ fromJson(needs.discover-packages.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Fetch git tags
+        run: git fetch --prune --unshallow --tags
+
+      - name: Build and publish ${{ matrix.package-name }} package
+        run: make build-package-dind
+        env:
+          PACKAGE_PATH: ${{ matrix.package-path }}
+          REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
+
+      - name: Set permissions on artifact
+        run: |
+          sudo chmod 0644 "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
+
+      - name: Upload ${{ matrix.package-name }} image lock
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.package-name }}-artifact
+          path: "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
+
+  build-package-repo:
+    runs-on: ubuntu-latest
+    needs: [discover-packages, build-packages]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Fetch git tags
+        run: git fetch --prune --unshallow --tags
+
+      - name: Download all image lock files
+        uses: actions/download-artifact@v3
+
+      - name: Copy image lock files to proper places
+        run: |
+          matrix='${{ needs.discover-packages.outputs.matrix }}'
+          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'mkdir -p "$1/bundle/.imgpkg/" && cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
+
+      - name: Build and publish TKG repository bundle
+        run: make build-package-repo-bundle-dind
+        env:
+          PACKAGE_REPOSITORY: "management"
+          REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
+
+      - name: Set permissions on artifact
+        run: |
+          sudo find build -type d -exec chmod 755 {} \;
+          sudo find build -type f -exec chmod 644 {} \;
+
+      - name: Upload PackageRepository artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: PackageRepository
+          path: |
+            build/package-repo-bundles/management/tanzu-framework-*.yaml
+            build/package-repo-bundles/management/tanzu-framework-*.tar.gz
+

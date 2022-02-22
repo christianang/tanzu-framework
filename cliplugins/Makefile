@@ -43,7 +43,10 @@ kbld-image-replace-%: ## Add newImage in kbld-config.yaml
 	$(eval OS = $(word 1,$(subst -, ,$(OSARCH))))
 	$(eval ARCH = $(word 2,$(subst -, ,$(OSARCH))))
 
-	cd ../hack/packages/kbld-image-replace && $(MAKE) run IMAGE=$(IMG_BASEPATH)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_DEFAULT_TAG) NEW_IMAGE=$(IMG_REPOSITORY)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_VERSION_OVERRIDE)
+	cd ../hack/packages/kbld-image-replace && \
+	  go run main.go -kbld-config ../../../packages/management/core-management-plugins/kbld-config.yaml \
+	  $(IMG_BASEPATH)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_DEFAULT_TAG) \
+	  $(IMG_REPOSITORY)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_VERSION_OVERRIDE)
 
 .PHONY: docker-image-name-%
 docker-image-name-%:
