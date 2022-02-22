@@ -33,10 +33,12 @@ func init() {
 	repoBundleGenerateCmd.Flags().StringVar(&registry, "registry", "", "OCI registry where the package repo bundle image needs to be stored")
 	repoBundleGenerateCmd.Flags().StringVar(&version, "version", "", "Package version of a package in repo bundle")
 	repoBundleGenerateCmd.Flags().StringVar(&subVersion, "sub-version", "", "Package subversion of a package in repo bundle")
+	repoBundleGenerateCmd.Flags().StringVar(&localRegistryURL, "local-registry-url", "", "Local registry URL for sha256 values")
 	repoBundleGenerateCmd.Flags().StringVar(&packageValuesFile, "package-values-file", "", "File containing the packages configuration")
-	repoBundleGenerateCmd.MarkFlagRequired("repository") //nolint: errcheck
-	repoBundleGenerateCmd.MarkFlagRequired("registry")   //nolint: errcheck
-	repoBundleGenerateCmd.MarkFlagRequired("version")    //nolint: errcheck
+	repoBundleGenerateCmd.MarkFlagRequired("repository")       //nolint: errcheck
+	repoBundleGenerateCmd.MarkFlagRequired("registry")         //nolint: errcheck
+	repoBundleGenerateCmd.MarkFlagRequired("version")          //nolint: errcheck
+	repoBundleGenerateCmd.MarkFlagRequired("localRegistryURL") //nolint: errcheck
 }
 
 func runRepoBundleGenerate(cmd *cobra.Command, args []string) error {
@@ -49,7 +51,7 @@ func runRepoBundleGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	if packageValuesFile == "" {
-		if err := generatePackageBundlesSha256(projectRootDir, constants.LocalRegistryURL); err != nil {
+		if err := generatePackageBundlesSha256(projectRootDir, localRegistryURL); err != nil {
 			return fmt.Errorf("couldn't generate package-values-sha256.yaml: %w", err)
 		}
 		packageValuesFile = filepath.Join(projectRootDir, constants.PackageValuesSha256FilePath)

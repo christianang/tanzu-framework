@@ -18,7 +18,7 @@ import (
 	"github.com/vmware-tanzu/tanzu-framework/hack/packages/package-tools/utils"
 )
 
-var packageRepository, version, subVersion string
+var packageRepository, version, subVersion, localRegistryURL string
 var all bool
 
 // packageBundleGenerateCmd is for generating package bundle
@@ -33,9 +33,11 @@ func init() {
 	packageBundleGenerateCmd.Flags().StringVar(&packageRepository, "repository", "", "Package repository of the package bundle being created")
 	packageBundleGenerateCmd.Flags().StringVar(&version, "version", "", "Package bundle version")
 	packageBundleGenerateCmd.Flags().StringVar(&subVersion, "sub-version", "", "Package bundle subversion")
+	packageBundleGenerateCmd.Flags().StringVar(&localRegistryURL, "local-registry-url", "", "Local registry URL for sha256 values")
 	packageBundleGenerateCmd.Flags().BoolVar(&all, "all", false, "Generate all package bundles in a repository")
-	packageBundleGenerateCmd.MarkFlagRequired("repository") //nolint: errcheck
-	packageBundleGenerateCmd.MarkFlagRequired("version")    //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("repository")       //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("version")          //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("localRegistryURL") //nolint: errcheck
 }
 
 func runPackageBundleGenerate(cmd *cobra.Command, args []string) error {
@@ -187,7 +189,7 @@ func generatePackageBundles(projectRootDir, toolsBinDir string) error {
 		// push the imgpkg bundle to local registry
 		lockOutputFile := pkg.Name + "-" + imagePackageVersion + "-lock-output.yaml"
 		imgpkgCmd := exec.Command(filepath.Join(toolsBinDir, "imgpkg"),
-			"push", "-b", constants.LocalRegistryURL+"/"+pkg.Name+":"+imagePackageVersion,
+			"push", "-b", localRegistryURL+"/"+pkg.Name+":"+imagePackageVersion,
 			"--file", filepath.Join(packagePath, "bundle"),
 			"--lock-output", lockOutputFile) // #nosec G204
 
@@ -209,7 +211,7 @@ func generatePackageBundles(projectRootDir, toolsBinDir string) error {
 		}
 
 		packageValues.Repositories[packageRepository].Packages[i].Version = getPackageVersion(version)
-		packageValues.Repositories[packageRepository].Packages[i].Sha256 = utils.AfterString(bundleLock.Bundle.Image, constants.LocalRegistryURL+"/"+pkg.Name+"@sha256:")
+		packageValues.Repositories[packageRepository].Packages[i].Sha256 = utils.AfterString(bundleLock.Bundle.Image, localRegistryURL+"/"+pkg.Name+"@sha256:")
 		yamlData, err := yaml.Marshal(&packageValues)
 		if err != nil {
 			return fmt.Errorf("error while marshaling: %w", err)
