@@ -14,6 +14,6 @@ RUN curl -sSL https://get.docker.com/ | sh
 
 RUN wget -O- https://carvel.dev/install.sh | bash
 
-COPY create-package-bundle.sh /create-package-bundle.sh
+COPY build-tooling/package-bundles/build-and-publish-package-bundle.sh /build-and-publish-package-bundle.sh
 
-ENTRYPOINT ["/create-package-bundle.sh"]
+ENTRYPOINT ["/build-and-publish-package-bundle.sh"]

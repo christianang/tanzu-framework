@@ -19,7 +19,7 @@ function generate_single_imgpkg_lock_output() {
 	make -C $path configure-package
 	mkdir -p "$path/bundle/.imgpkg"
 	yttCmd="${TOOLS_BIN_DIR}/ytt --ignore-unknown-comments -f $path/bundle/config/"
-	${yttCmd} | "${TOOLS_BIN_DIR}"/kbld -f - -f "${PROJECT_ROOT}/packages/kbld-config.yaml" --imgpkg-lock-output "$path/bundle/.imgpkg/images.yml" > /dev/null
+	${yttCmd} | "${TOOLS_BIN_DIR}"/kbld -f - -f "${path}/kbld-config.yaml" --imgpkg-lock-output "$path/bundle/.imgpkg/images.yml" > /dev/null
 	make -C $path reset-package
 }
 
@@ -128,6 +128,15 @@ function trivy_scan() {
   while IFS='|' read -r image; do
     "${TOOLS_BIN_DIR}"/trivy --cache-dir "$tmp_dir" image --exit-code 1 --severity CRITICAL --ignore-unfixed "$image"
   done < <("${TOOLS_BIN_DIR}"/yq e ".overrides[] | .newImage" "${PROJECT_ROOT}/packages/kbld-config.yaml")
+}
+
+function push_package_bundle() {
+  local name="${PACKAGE_NAME}"
+  local imagePackageVersion="v${REPO_VERSION}"
+  mkdir -p "${PACKAGES_BUILD_ARTIFACTS_DIR}/package-bundles/${PACKAGE_REPOSITORY}/${name}-${imagePackageVersion}"
+  tar -xvf "${PACKAGES_BUILD_ARTIFACTS_DIR}/package-bundles/${PACKAGE_REPOSITORY}/${name}-${imagePackageVersion}.tar.gz" -C "${PACKAGES_BUILD_ARTIFACTS_DIR}/package-bundles/${PACKAGE_REPOSITORY}/${name}-${imagePackageVersion}"
+  "${TOOLS_BIN_DIR}"/imgpkg push -b "${REGISTRY}/${name}:${imagePackageVersion}" --file "${PACKAGES_BUILD_ARTIFACTS_DIR}/package-bundles/${PACKAGE_REPOSITORY}/${name}-${imagePackageVersion}"
+  rm -rf "${PACKAGES_BUILD_ARTIFACTS_DIR}/package-bundles/${PACKAGE_REPOSITORY}/${name}-${imagePackageVersion}"
 }
 
 function push_package_bundles() {

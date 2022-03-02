@@ -1,0 +1,12 @@
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: capabilities
+  namespace: management-package
+spec:
+  serviceAccountName: tanzu-tkg-package-sa
+  packageRef:
+    refName: capabilities.tanzu.vmware.com
+    versionSelection:
+      prereleases: {}

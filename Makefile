@@ -713,7 +713,11 @@ management-package-bundles: tools management-imgpkg-lock-output ## Build tar bun
 
 .PHONY: package-repo-bundle
 package-repo-bundle: ## Build tar bundles for package repo with given package-values.yaml file
-	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundles
+	PACKAGE_NAME=$(PACKAGE_NAME) PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundles
+
+.PHONY: push-package-bundle
+push-package-bundle: tools
+	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_bundle
 
 .PHONY: push-package-bundles
 push-package-bundles: push-management-package-bundles  ## Push package bundles
@@ -754,13 +758,15 @@ management-package-vendir-sync: ## Performs a `vendir sync` for each management 
 		$(TOOLS_BIN_DIR)/vendir sync >> /dev/null;\
 		popd;\
 	done
-	
+
 .PHONY: package-push-bundles-repo ## Performs build and publishes packages and repo bundles
 package-push-bundles-repo: package-bundles push-package-bundles package-repo-bundle push-package-repo-bundles
 
-PHONY: docker-build-dind
-docker-build-dind: ## Build docker image
+image-tooling:
 	docker build -t image-tooling:latest -f build-tooling/images/Dockerfile .
+
+PHONY: docker-build-dind
+docker-build-dind: image-tooling ## Build docker images
 	@ for COMPONENT in $(COMPONENTS) ; do \
 		docker run \
 		-e COMPONENT_PATH=$$COMPONENT \
@@ -768,5 +774,27 @@ docker-build-dind: ## Build docker image
 		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
 		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
 		-e IMG_VERSION_OVERRIDE=${BUILD_VERSION} \
-		-v /var/run/docker.sock:/var/run/docker.sock image-tooling:latest;  \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD):/tanzu-framework \
+		image-tooling:latest; \
+	done
+
+package-bundle-tooling:
+	docker build -t package-bundle-tooling:latest -f build-tooling/package-bundles/Dockerfile .
+
+STANDALONE_PACKAGES=capabilities
+
+PHONY: docker-build-packages-dind
+docker-build-packages-dind: package-bundle-tooling ## Build package bundles
+	@ for PACKAGE_NAME in $(STANDALONE_PACKAGES) ; do \
+		docker run \
+		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+		-e PACKAGE_REPOSITORY="standalone" \
+		-e PACKAGE_NAME=$$PACKAGE_NAME \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD):/tanzu-framework \
+		--net=host \
+		package-bundle-tooling:latest; \
 	done
