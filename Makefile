@@ -802,7 +802,7 @@ docker-build-packages-dind: package-bundle-tooling ## Build package bundles
 COMPOSITE_PACKAGES=tkg
 
 PHONY: docker-build-composite-packages-dind
-docker-build-composite-packages-dind: package-bundle-tooling ## Build package bundles
+docker-build-composite-packages-dind: package-bundle-tooling ## Build composite package bundles
 	@ for PACKAGE_NAME in $(COMPOSITE_PACKAGES) ; do \
 		docker run \
 		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
