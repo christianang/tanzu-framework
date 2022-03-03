@@ -791,7 +791,24 @@ docker-build-packages-dind: package-bundle-tooling ## Build package bundles
 		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
 		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
 		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
-		-e PACKAGE_REPOSITORY="standalone" \
+		-e PACKAGE_REPOSITORY="standalone" \  # this variable should be renamed
+		-e PACKAGE_NAME=$$PACKAGE_NAME \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD):/tanzu-framework \
+		--net=host \
+		package-bundle-tooling:latest; \
+	done
+
+COMPOSITE_PACKAGES=tkg
+
+PHONY: docker-build-composite-packages-dind
+docker-build-composite-packages-dind: package-bundle-tooling ## Build package bundles
+	@ for PACKAGE_NAME in $(COMPOSITE_PACKAGES) ; do \
+		docker run \
+		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+		-e PACKAGE_REPOSITORY="management" \
 		-e PACKAGE_NAME=$$PACKAGE_NAME \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(PWD):/tanzu-framework \

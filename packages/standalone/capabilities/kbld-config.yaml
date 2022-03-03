@@ -1,0 +1,5 @@
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Config
+overrides:
+- image: capabilities-controller-manager:latest
+  newImage: localhost:5000/capabilities-controller-manager:v0.18.0-dev
