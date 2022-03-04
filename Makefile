@@ -791,7 +791,7 @@ docker-build-packages-dind: package-bundle-tooling ## Build package bundles
 		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
 		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
 		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
-		-e PACKAGE_REPOSITORY="standalone" \  # this variable should be renamed
+		-e PACKAGE_REPOSITORY="standalone" \
 		-e PACKAGE_NAME=$$PACKAGE_NAME \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(PWD):/tanzu-framework \
