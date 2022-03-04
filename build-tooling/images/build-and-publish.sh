@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /tanzu-framework/${COMPONENT_PATH}
+cd "/tanzu-framework/$COMPONENT_PATH"
 
 docker login --username "$REGISTRY_USERNAME" --password "$REGISTRY_PASSWORD" "$REGISTRY_SERVER"
-OCI_REGISTRY="$REGISTRY_SERVER" make docker-build-and-publish
+OCI_REGISTRY="$OCI_REGISTRY" make docker-build-and-publish

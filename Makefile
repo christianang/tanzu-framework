@@ -773,6 +773,7 @@ docker-build-dind: image-tooling ## Build docker images
 		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
 		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
 		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+		-e OCI_REGISTRY=${OCI_REGISTRY} \
 		-e IMG_VERSION_OVERRIDE=${BUILD_VERSION} \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(PWD):/tanzu-framework \
