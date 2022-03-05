@@ -7,7 +7,7 @@ reset-package: ## Reset configured package
 
 .PHONY: build-and-push-image
 build-and-push-image:
-	cd ../../../pkg/v1/sdk/capabilities && make docker-build-and-publish # build the controller image
+	cd ../../../pkg/v1/sdk/capabilities && OCI_REGISTRY=${OCI_REGISTRY} make docker-build-and-publish # build the controller image
 
 build-and-push: export PACKAGE_REPOSITORY = standalone
 build-and-push: export PACKAGE_NAME = capabilities

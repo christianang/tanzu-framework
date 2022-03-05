@@ -765,7 +765,7 @@ package-push-bundles-repo: package-bundles push-package-bundles package-repo-bun
 image-tooling:
 	docker build -t image-tooling:latest -f build-tooling/images/Dockerfile .
 
-PHONY: docker-build-dind
+.PHONY: docker-build-dind
 docker-build-dind: image-tooling ## Build docker images
 	@ for COMPONENT in $(COMPONENTS) ; do \
 		docker run \
@@ -785,24 +785,22 @@ package-bundle-tooling:
 
 STANDALONE_PACKAGES=capabilities
 
-PHONY: docker-build-packages-dind
-docker-build-packages-dind: package-bundle-tooling ## Build package bundles
-	@ for PACKAGE_NAME in $(STANDALONE_PACKAGES) ; do \
-		docker run \
-		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
-		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
-		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
-		-e PACKAGE_REPOSITORY="standalone" \
-		-e PACKAGE_NAME=$$PACKAGE_NAME \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(PWD):/tanzu-framework \
-		--net=host \
-		package-bundle-tooling:latest; \
-	done
+.PHONY: docker-build-package-dind
+docker-build-package-dind: package-bundle-tooling ## Build package bundles
+	docker run \
+	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+	-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+	-e PACKAGE_PATH=${PACKAGE_PATH} \
+	-e OCI_REGISTRY=${OCI_REGISTRY} \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v $(PWD):/tanzu-framework \
+	--net=host \
+	package-bundle-tooling:latest; \
 
 COMPOSITE_PACKAGES=tkg
 
-PHONY: docker-build-composite-packages-dind
+.PHONY: docker-build-composite-packages-dind
 docker-build-composite-packages-dind: package-bundle-tooling ## Build composite package bundles
 	@ for PACKAGE_NAME in $(COMPOSITE_PACKAGES) ; do \
 		docker run \

@@ -1,4 +1,4 @@
-name: Build images
+name: Build capabilities package
 on: [push]
 jobs:
   docker:
@@ -6,9 +6,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Build and publish image
-        run: make docker-build-dind
+      - name: Build and publish package
+        run: make docker-build-package-dind
         env:
+          PACKAGE_PATH: "packages/standalone/capabilities"
           REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
