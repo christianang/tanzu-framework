@@ -716,7 +716,7 @@ package-repo-bundle: ## Build tar bundles for package repo with given package-va
 	PACKAGE_NAME=$(PACKAGE_NAME) PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundles
 
 .PHONY: push-package-bundle
-push-package-bundle: tools
+push-package-bundle: $(IMGPKG)
 	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_bundle
 
 .PHONY: push-package-bundles
