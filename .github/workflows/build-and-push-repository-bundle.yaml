@@ -1,0 +1,17 @@
+name: Build TKG repository bundle
+on: [push]
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build and publish TKG repository bundle
+        run: make docker-build-package-repo-bundle-dind
+        env:
+          PACKAGE_REPOSITORY: "tkgrepo"
+          PACKAGE_VALUES_FILE: "packages/package-values.yaml"
+          REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}

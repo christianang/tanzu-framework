@@ -68,7 +68,7 @@ function create_package_bundles() {
 }
 
 function generate_package_bundles_sha256() {
-  cp "${PROJECT_ROOT}/packages/package-values.yaml" "${PROJECT_ROOT}/packages/package-values-sha256.yaml"
+  cp "${PROJECT_ROOT}/${PACKAGE_VALUES_FILE}" "${PROJECT_ROOT}/packages/package-values-sha256.yaml"
   while IFS='|' read -r name version packageSubVersion path; do
     if [ "$packageSubVersion" == null -o "$packageSubVersion" == "" ]; then
       packageVersion="${REPO_VERSION}"
