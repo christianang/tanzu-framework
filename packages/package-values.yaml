@@ -20,30 +20,6 @@ tkgrepoPackageRepository:
       kubeAPIBurst: 30
 
   packages:
-    - name: featuregates
-      displayName: featuregates
-      #! Relative path to package bundle
-      path: packages/featuregates
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "featuregates:latest"
-    - name: core-management-plugins
-      displayName: core-management-plugins
-      #! Relative path to package bundle
-      path: packages/core-management-plugins
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "core-management-plugins:latest"
-    - name: addons-manager
-      displayName: addons-manager
-      #! Relative path to package bundle
-      path: packages/addons-manager
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "addons-manager:latest"
     - name: tkg
       displayName: tkg
       #! Relative path to package bundle
@@ -52,54 +28,6 @@ tkgrepoPackageRepository:
       version: latest
       #! Gets replaced with imgpkg sha256 at build, this should be name:version
       sha256: "tkg:latest"
-    - name: tkg-clusterclass
-      displayName: tkg-clusterclass
-      #! Relative path to package bundle
-      path: packages/tkg-clusterclass
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "tkg-clusterclass:latest"
-    - name: tkg-clusterclass-docker
-      displayName: tkg-clusterclass-docker
-      #! Relative path to package bundle
-      path: packages/tkg-clusterclass-docker
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "tkg-clusterclass-docker:latest"
-    - name: tkg-clusterclass-azure
-      displayName: tkg-clusterclass-azure
-      #! Relative path to package bundle
-      path: packages/tkg-clusterclass-azure
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "tkg-clusterclass-azure:latest"
-    - name: tkg-clusterclass-vsphere
-      displayName: tkg-clusterclass-vsphere
-      #! Relative path to package bundle
-      path: packages/tkg-clusterclass-vsphere
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "tkg-clusterclass-vsphere:latest"
-    - name: tkg-clusterclass-aws
-      displayName: tkg-clusterclass-aws
-      #! Relative path to package bundle
-      path: packages/tkg-clusterclass-aws
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "tkg-clusterclass-aws:latest"
-    - name: standalone-plugins
-      displayName: standalone-plugins
-      #! Relative path to package bundle
-      path: packages/standalone-plugins
-      domain: tanzu.vmware.com
-      version: latest
-      #! Gets replaced with imgpkg sha256 at build, this should be name:version
-      sha256: "standalone-plugins:latest"
     - name: capabilities
       path: packages/capabilities
       domain: tanzu.vmware.com
