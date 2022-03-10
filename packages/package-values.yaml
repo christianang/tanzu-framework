@@ -9,7 +9,7 @@ tkgrepoPackageRepository:
   #! This gets overwritten by build
   version: null
   sha256: null
-  name: tkg
+  name: tkgrepo
   domain: tanzu.vmware.com
 
   packageSpec:

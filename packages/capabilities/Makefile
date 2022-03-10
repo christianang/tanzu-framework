@@ -5,7 +5,7 @@ configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
 
-build-and-push: export PACKAGE_REPOSITORY = tkg
+build-and-push: export PACKAGE_REPOSITORY = tkgrepo
 build-and-push: export PACKAGE_NAME = capabilities
 
 .PHONY: build-and-push
