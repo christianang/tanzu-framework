@@ -5,11 +5,11 @@ configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
 
-build-and-push: export PACKAGE_REPOSITORY = management
+build-and-push: export PACKAGE_REPOSITORY = tkg
 build-and-push: export PACKAGE_NAME = tkg
 
 .PHONY: build-and-push
 build-and-push:
-	cd ../../../ && \
+	cd ../../ && \
 	make package-bundle && \
 	make push-package-bundle

@@ -5,16 +5,16 @@ configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
 
-build-and-push: export PACKAGE_REPOSITORY = standalone
+build-and-push: export PACKAGE_REPOSITORY = tkg
 build-and-push: export PACKAGE_NAME = capabilities
 
 .PHONY: build-and-push
 build-and-push: build-and-push-image
-	cd ../../../ && \
+	cd ../../ && \
 	make package-bundle && \
 	make push-package-bundle
 
 
 .PHONY: build-and-push-image
 build-and-push-image:
-	cd ../../../pkg/v1/sdk/capabilities && OCI_REGISTRY=${OCI_REGISTRY} make docker-build-and-publish # build the controller image
+	cd ../../pkg/v1/sdk/capabilities && OCI_REGISTRY=${OCI_REGISTRY} make docker-build-and-publish # build the controller image

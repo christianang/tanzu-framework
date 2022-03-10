@@ -707,35 +707,21 @@ package-bundle: ## Build one specific tar bundle package, needs PACKAGE_NAME VER
 .PHONY: package-bundles
 package-bundles: management-package-bundles ## Build tar bundles for multiple packages
 
-.PHONY: management-package-bundles
-management-package-bundles: tools management-imgpkg-lock-output ## Build tar bundles for packages
-	PACKAGE_REPOSITORY="management" $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_bundles localhost:5000
-
 .PHONY: package-repo-bundle
-package-repo-bundle: ## Build tar bundles for package repo with given package-values.yaml file
-	PACKAGE_NAME=$(PACKAGE_NAME) PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundles
+package-repo-bundle: $(YQ) $(YTT) ## Build tar bundles for package repo with given package-values.yaml file
+	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundle
 
 .PHONY: push-package-bundle
 push-package-bundle: $(IMGPKG)
 	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_bundle
 
-.PHONY: push-package-bundles
-push-package-bundles: push-management-package-bundles  ## Push package bundles
+.PHONY: push-package-repo-bundle
+push-package-repo-bundle: $(IMGPKG) $(YQ) $(YTT) ## Push management package repo bundles
+	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_repo_bundle
 
-.PHONY: push-package-repo-bundles
-push-package-repo-bundles: push-management-package-repo-bundle ## Push package repo bundles
-
-.PHONY: push-management-package-bundles
-push-management-package-bundles: tools ## Push management package bundles
-	PACKAGE_REPOSITORY="management" REGISTRY=$(OCI_REGISTRY)/packages/management $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_bundles
-
-.PHONY: push-management-package-repo-bundle
-push-management-package-repo-bundle: tools ## Push management package repo bundles
-	PACKAGE_REPOSITORY="management" REGISTRY=$(OCI_REGISTRY)/packages/management $(PACKAGES_SCRIPTS_DIR)/package-utils.sh push_package_repo_bundles
-
-.PHONY: management-imgpkg-lock-output
-management-imgpkg-lock-output: tools ## Generate imgpkg lock output for packages
-	PACKAGE_REPOSITORY="management" $(PACKAGES_SCRIPTS_DIR)/package-utils.sh generate_imgpkg_lock_output
+.PHONY: generate-imgpkg-lock-output
+generate-imgpkg-lock-output: $(KBLD) $(YQ) $(YTT) ## Generate imgpkg lock output for packages
+	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh generate_imgpkg_lock_output
 
 .PHONY: clean-registry
 clean-registry: ## Stops and removes local docker registry
@@ -796,21 +782,21 @@ docker-build-package-dind: package-bundle-tooling ## Build package bundles
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v $(PWD):/tanzu-framework \
 	--net=host \
-	package-bundle-tooling:latest; \
+	package-bundle-tooling:latest;
 
-COMPOSITE_PACKAGES=tkg
+package-repo-bundle-tooling:
+	docker build -t package-repo-bundle-tooling:latest -f build-tooling/package-repository-bundles/Dockerfile .
 
-.PHONY: docker-build-composite-packages-dind
-docker-build-composite-packages-dind: package-bundle-tooling ## Build composite package bundles
-	@ for PACKAGE_NAME in $(COMPOSITE_PACKAGES) ; do \
-		docker run \
-		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
-		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
-		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
-		-e PACKAGE_REPOSITORY="management" \
-		-e PACKAGE_NAME=$$PACKAGE_NAME \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(PWD):/tanzu-framework \
-		--net=host \
-		package-bundle-tooling:latest; \
-	done
+.PHONY: docker-build-package-repo-bundle-dind
+docker-build-package-repo-bundle-dind: package-repo-bundle-tooling ## Build package repo bundle
+	docker run \
+	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
+	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
+	-e REGISTRY_SERVER=${REGISTRY_SERVER} \
+	-e OCI_REGISTRY=${OCI_REGISTRY} \
+	-e PACKAGE_REPOSITORY="tkgrepo" \
+	-e PACKAGE_VALUES_FILE="packages/package-values.yaml" \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v $(PWD):/tanzu-framework \
+	--net=host \
+	package-repo-bundle-tooling:latest;

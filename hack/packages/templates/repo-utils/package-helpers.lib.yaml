@@ -6,10 +6,10 @@
 #@     return data.values.managementPackageRepository
 #@   elif data.values.packageRepository == "standalone":
 #@     return data.values.standalonePackageRepository
-#@   elif data.values.packageRepository == "tkg":
-#@     return data.values.tkgPackageRepository
+#@   elif data.values.packageRepository == "tkgrepo":
+#@     return data.values.tkgrepoPackageRepository
 #@   else:
-#@     assert("Package Repository must be management or standalone or tkg")
+#@     assert("Package Repository must be management or standalone or tkgrepo")
 #@   end
 #@ end
 
