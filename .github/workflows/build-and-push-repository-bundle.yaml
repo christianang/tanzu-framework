@@ -67,7 +67,7 @@ jobs:
       - name: Copy image lock files to proper places
         run: |
           matrix='${{ needs.matrix.outputs.matrix }}'
-          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
+          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'mkdir -p "$1/bundle/.imgpkg/" && cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
 
       - name: Build and publish TKG repository bundle
         run: make docker-build-package-repo-bundle-dind
