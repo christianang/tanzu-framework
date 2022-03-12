@@ -44,6 +44,10 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
 
+      - name: Set permissions on artifact
+        run: |
+          chmod 0644 "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
+
       - name: Upload ${{ matrix.package-name }} image lock
         uses: actions/upload-artifact@v3
         with:
