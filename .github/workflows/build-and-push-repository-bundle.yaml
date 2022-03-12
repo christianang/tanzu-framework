@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.package-name }}-artifact
-          path: "${{ matrix.package-path }}/.imgpkg/images.yml"
+          path: "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
 
   build-package-repo:
     runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
       - name: Copy image lock files to proper places
         run: |
           matrix='${{ needs.matrix.outputs.matrix }}'
-          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'cp "$0-artifact/images.yml" "$1/.imgpkg/images.yml"'
+          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
 
       - name: Build and publish TKG repository bundle
         run: make docker-build-package-repo-bundle-dind
