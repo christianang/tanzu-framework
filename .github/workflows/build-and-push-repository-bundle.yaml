@@ -13,7 +13,7 @@ jobs:
         env:
           PACKAGE_REPOSITORY: "tkgrepo"
         run: |
-          make $(realpath hack/tools/bin/yq)
+          make -C hack/tools yq
           matrix=$(hack/tools/bin/yq e -j '.tkgrepoPackageRepository.packages.[] | {"package-name": .name, "package-path": .path} | [.] | {"include": .}' packages/package-values.yaml)
           echo "::set-output name=matrix::${matrix}"
 
