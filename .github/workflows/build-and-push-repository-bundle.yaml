@@ -46,7 +46,7 @@ jobs:
 
       - name: Set permissions on artifact
         run: |
-          chmod 0644 "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
+          sudo chmod 0644 "${{ matrix.package-path }}/bundle/.imgpkg/images.yml"
 
       - name: Upload ${{ matrix.package-name }} image lock
         uses: actions/upload-artifact@v3
