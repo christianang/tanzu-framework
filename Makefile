@@ -763,12 +763,13 @@ docker-build-dind: image-tooling ## Build docker images
 		-e IMG_VERSION_OVERRIDE=${BUILD_VERSION} \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(PWD):/tanzu-framework \
-		--user $(id -u):$(id -g) \
 		image-tooling:latest; \
 	done
 
 package-bundle-tooling:
 	docker build -t package-bundle-tooling:latest -f build-tooling/package-bundles/Dockerfile .
+
+STANDALONE_PACKAGES=capabilities
 
 .PHONY: docker-build-package-dind
 docker-build-package-dind: package-bundle-tooling ## Build package bundles
@@ -781,7 +782,6 @@ docker-build-package-dind: package-bundle-tooling ## Build package bundles
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v $(PWD):/tanzu-framework \
 	--net=host \
-	--user $(id -u):$(id -g) \
 	package-bundle-tooling:latest;
 
 package-repo-bundle-tooling:
@@ -799,5 +799,4 @@ docker-build-package-repo-bundle-dind: package-repo-bundle-tooling ## Build pack
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v $(PWD):/tanzu-framework \
 	--net=host \
-	--user $(id -u):$(id -g) \
 	package-repo-bundle-tooling:latest;
