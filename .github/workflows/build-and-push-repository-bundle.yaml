@@ -31,7 +31,6 @@ jobs:
     needs: matrix
     strategy:
       matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
-      runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
