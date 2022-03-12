@@ -81,7 +81,8 @@ jobs:
 
       - name: Set permissions on artifact
         run: |
-          sudo chmod 0644 "build/package-repo-bundles/tanzu-framework-*.yaml"
+          sudo find build -type d -exec chmod 755 {} \;
+          sudo find build -type f -exec chmod 644 {} \;
 
       - name: Upload PackageRepository artifact
         uses: actions/upload-artifact@v3
