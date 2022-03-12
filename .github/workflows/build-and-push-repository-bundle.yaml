@@ -34,6 +34,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Build and publish ${{ matrix.package-name }} package
         run: make docker-build-package-dind
         env:
@@ -43,12 +44,27 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
 
+      - name: Upload ${{ matrix.package-name }} image lock
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.package-name }}-artifact
+          path: "${{ matrix.package-path }}/.imgpkg/images.yml"
 
-  docker:
+  build-package-repo:
     runs-on: ubuntu-latest
+    needs: [matrix, build-packages]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Download all image lock files
+        uses: actions/download-artifact@v3
+
+      - name: Copy image lock files to proper places
+        run: |
+          matrix='${{ needs.matrix.outputs.matrix }}'
+          echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'cp "$0-artifact/images.yml" "$1/.imgpkg/images.yml"'
+
       - name: Build and publish TKG repository bundle
         run: make docker-build-package-repo-bundle-dind
         env:
