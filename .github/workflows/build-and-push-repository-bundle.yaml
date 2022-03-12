@@ -14,23 +14,36 @@ jobs:
           PACKAGE_REPOSITORY: "tkgrepo"
         run: |
           make -C hack/tools yq
-          matrix=$(hack/tools/bin/yq e -j '.tkgrepoPackageRepository.packages.[] | {"package-name": .name, "package-path": .path} | [.] | {"include": .}' packages/package-values.yaml)
+          matrix=$(hack/tools/bin/yq e -j -I=0 '.tkgrepoPackageRepository.packages.[] | {"package-name": .name, "package-path": .path} | [.] | {"include": .}' packages/package-values.yaml)
           echo "::set-output name=matrix::${matrix}"
 
   check-matrix:
     runs-on: ubuntu-latest
     needs: matrix
     steps:
-      - name: Install json2yaml
-        run: |
-          sudo npm install -g json2yaml
-
       - name: Check matrix definition
         run: |
           matrix='${{ needs.matrix.outputs.matrix }}'
-          echo $matrix
           echo $matrix | jq .
-          echo $matrix | json2yaml
+
+  build-packages:
+    runs-on: ubuntu-latest
+    needs: matrix
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+      runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build and publish ${{ matrix.package-name }} package
+        run: make docker-build-package-dind
+        env:
+          PACKAGE_PATH: ${{ matrix.package-path }}
+          REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          OCI_REGISTRY: ${{ secrets.OCI_REGISTRY }}
+
 
   docker:
     runs-on: ubuntu-latest
