@@ -708,7 +708,7 @@ package-bundle: ## Build one specific tar bundle package, needs PACKAGE_NAME VER
 package-bundles: management-package-bundles ## Build tar bundles for multiple packages
 
 .PHONY: package-repo-bundle
-package-repo-bundle: generate-imgpkg-lock-output $(YQ) $(YTT) ## Build tar bundles for package repo with given package-values.yaml file
+package-repo-bundle: $(YQ) $(YTT) ## Build tar bundles for package repo with given package-values.yaml file
 	PACKAGE_REPOSITORY=$(PACKAGE_REPOSITORY) REGISTRY=$(OCI_REGISTRY)/packages/$(PACKAGE_REPOSITORY) PACKAGE_VALUES_FILE=$(PACKAGE_VALUES_FILE) $(PACKAGES_SCRIPTS_DIR)/package-utils.sh create_package_repo_bundle
 
 .PHONY: push-package-bundle
