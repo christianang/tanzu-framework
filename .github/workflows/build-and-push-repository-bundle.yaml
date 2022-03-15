@@ -1,7 +1,7 @@
 name: Build TKG repository bundle
 on: [push]
 jobs:
-  matrix:
+  discover-packages:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -17,20 +17,20 @@ jobs:
           matrix=$(hack/tools/bin/yq e -j -I=0 '.tkgrepoPackageRepository.packages.[] | {"package-name": .name, "package-path": .path} | [.] | {"include": .}' packages/package-values.yaml)
           echo "::set-output name=matrix::${matrix}"
 
-  check-matrix:
+  check-packages:
     runs-on: ubuntu-latest
     needs: matrix
     steps:
-      - name: Check matrix definition
+      - name: Check list of packages
         run: |
-          matrix='${{ needs.matrix.outputs.matrix }}'
+          matrix='${{ needs.discover-packages.outputs.matrix }}'
           echo $matrix | jq .
 
   build-packages:
     runs-on: ubuntu-latest
-    needs: matrix
+    needs: discover-packages
     strategy:
-      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.discover-packages.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,7 +56,7 @@ jobs:
 
   build-package-repo:
     runs-on: ubuntu-latest
-    needs: [matrix, build-packages]
+    needs: [discover-packages, build-packages]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -66,7 +66,7 @@ jobs:
 
       - name: Copy image lock files to proper places
         run: |
-          matrix='${{ needs.matrix.outputs.matrix }}'
+          matrix='${{ needs.discover-packages.outputs.matrix }}'
           echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'mkdir -p "$1/bundle/.imgpkg/" && cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
 
       - name: Build and publish TKG repository bundle
