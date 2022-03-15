@@ -748,31 +748,11 @@ management-package-vendir-sync: ## Performs a `vendir sync` for each management 
 .PHONY: package-push-bundles-repo ## Performs build and publishes packages and repo bundles
 package-push-bundles-repo: package-bundles push-package-bundles package-repo-bundle push-package-repo-bundles
 
-image-tooling:
-	docker build -t image-tooling:latest -f build-tooling/images/Dockerfile .
-
-.PHONY: docker-build-dind
-docker-build-dind: image-tooling ## Build docker images
-	@ for COMPONENT in $(COMPONENTS) ; do \
-		docker run \
-		-e COMPONENT_PATH=$$COMPONENT \
-		-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
-		-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
-		-e REGISTRY_SERVER=${REGISTRY_SERVER} \
-		-e OCI_REGISTRY=${OCI_REGISTRY} \
-		-e IMG_VERSION_OVERRIDE=${BUILD_VERSION} \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(PWD):/tanzu-framework \
-		image-tooling:latest; \
-	done
-
 package-bundle-tooling:
 	docker build -t package-bundle-tooling:latest -f build-tooling/package-bundles/Dockerfile .
 
-STANDALONE_PACKAGES=capabilities
-
-.PHONY: docker-build-package-dind
-docker-build-package-dind: package-bundle-tooling ## Build package bundles
+.PHONY: build-package-dind
+build-package-dind: package-bundle-tooling ## Build package bundles
 	docker run \
 	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
 	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \
@@ -787,8 +767,8 @@ docker-build-package-dind: package-bundle-tooling ## Build package bundles
 package-repo-bundle-tooling:
 	docker build -t package-repo-bundle-tooling:latest -f build-tooling/package-repository-bundles/Dockerfile .
 
-.PHONY: docker-build-package-repo-bundle-dind
-docker-build-package-repo-bundle-dind: package-repo-bundle-tooling ## Build package repo bundle
+.PHONY: build-package-repo-bundle-dind
+build-package-repo-bundle-dind: package-repo-bundle-tooling ## Build package repo bundle
 	docker run \
 	-e REGISTRY_USERNAME=${REGISTRY_USERNAME} \
 	-e REGISTRY_PASSWORD=${REGISTRY_PASSWORD} \

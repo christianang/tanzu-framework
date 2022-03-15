@@ -7,7 +7,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build and publish TKG composite package
-        run: make docker-build-package-dind
+        run: make build-package-dind
         env:
           PACKAGE_PATH: "packages/tkg"
           REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}

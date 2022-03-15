@@ -7,7 +7,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build and publish capabilities package
-        run: make docker-build-package-dind
+        run: make build-package-dind
         env:
           PACKAGE_PATH: "packages/capabilities"
           REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}

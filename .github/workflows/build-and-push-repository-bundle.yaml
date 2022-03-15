@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build and publish ${{ matrix.package-name }} package
-        run: make docker-build-package-dind
+        run: make build-package-dind
         env:
           PACKAGE_PATH: ${{ matrix.package-path }}
           REGISTRY_SERVER: ${{ secrets.REGISTRY_SERVER }}
@@ -70,7 +70,7 @@ jobs:
           echo $matrix | jq ".include[] | .[]" | xargs -n2 sh -c 'mkdir -p "$1/bundle/.imgpkg/" && cp "$0-artifact/images.yml" "$1/bundle/.imgpkg/images.yml"'
 
       - name: Build and publish TKG repository bundle
-        run: make docker-build-package-repo-bundle-dind
+        run: make build-package-repo-bundle-dind
         env:
           PACKAGE_REPOSITORY: "tkgrepo"
           PACKAGE_VALUES_FILE: "packages/package-values.yaml"
