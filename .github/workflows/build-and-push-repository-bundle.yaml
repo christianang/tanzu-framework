@@ -8,6 +8,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Set Matrix
         id: set-matrix
         env:
@@ -35,6 +36,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Fetch git tags
+        run: git fetch --prune --unshallow --tags
+
       - name: Build and publish ${{ matrix.package-name }} package
         run: make build-package-dind
         env:
@@ -60,6 +64,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Fetch git tags
+        run: git fetch --prune --unshallow --tags
 
       - name: Download all image lock files
         uses: actions/download-artifact@v3
