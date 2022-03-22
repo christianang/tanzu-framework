@@ -33,3 +33,33 @@ tkgrepoPackageRepository:
       domain: tanzu.vmware.com
       version: latest
       sha256: "capabilities:latest"
+    - name: tkg-clusterclass
+      displayName: tkg-clusterclass
+      path: packages/tkg-clusterclass
+      domain: tanzu.vmware.com
+      version: latest
+      sha256: "tkg-clusterclass:latest"
+    - name: tkg-clusterclass-docker
+      displayName: tkg-clusterclass-docker
+      path: packages/tkg-clusterclass-docker
+      domain: tanzu.vmware.com
+      version: latest
+      sha256: "tkg-clusterclass-docker:latest"
+    - name: tkg-clusterclass-azure
+      displayName: tkg-clusterclass-azure
+      path: packages/tkg-clusterclass-azure
+      domain: tanzu.vmware.com
+      version: latest
+      sha256: "tkg-clusterclass-azure:latest"
+    - name: tkg-clusterclass-vsphere
+      displayName: tkg-clusterclass-vsphere
+      path: packages/tkg-clusterclass-vsphere
+      domain: tanzu.vmware.com
+      version: latest
+      sha256: "tkg-clusterclass-vsphere:latest"
+    - name: tkg-clusterclass-aws
+      displayName: tkg-clusterclass-aws
+      path: packages/tkg-clusterclass-aws
+      domain: tanzu.vmware.com
+      version: latest
+      sha256: "tkg-clusterclass-aws:latest"

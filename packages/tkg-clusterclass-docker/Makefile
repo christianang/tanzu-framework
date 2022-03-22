@@ -4,3 +4,12 @@
 configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
+
+build-and-push: export PACKAGE_REPOSITORY = tkgrepo
+build-and-push: export PACKAGE_NAME = tkg-clusterclass-docker
+
+.PHONY: build-and-push
+build-and-push:
+	cd ../../ && \
+	make package-bundle && \
+	make push-package-bundle
