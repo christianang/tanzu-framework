@@ -43,7 +43,7 @@ docker-publish: ## Publish docker image
 
 .PHONY: kbld-image-replace
 kbld-image-replace: ## Add newImage in kbld-config.yaml
-	cd ../../../../../hack/packages/kbld-image-replace && $(MAKE) run IMAGE=$(IMG_DEFAULT_NAME_TAG) NEW_IMAGE=$(IMG)
+	echo "No image in tkr-conversion package to kbld-image-replace"
 
 .PHONY: docker-image-names
 docker-image-names:
