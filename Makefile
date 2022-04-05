@@ -251,7 +251,7 @@ build-cli-with-oci-discovery: ${CLI_ADMIN_JOBS_OCI_DISCOVERY} ${CLI_JOBS_OCI_DIS
 build-cli-with-local-discovery: ${CLI_ADMIN_JOBS_LOCAL_DISCOVERY} ${CLI_JOBS_LOCAL_DISCOVERY} publish-plugins-all-local publish-admin-plugins-all-local ## Build Tanzu CLI with Local standalone discovery
 	@rm -rf pinniped
 
-.PHONY: build-cli-with-local-discovery
+.PHONY: build-cli-plugins-for-core-management-package
 build-cli-plugins-for-core-management-package: ${CLI_JOBS_LOCAL_DISCOVERY}
 	@rm -rf pinniped
 

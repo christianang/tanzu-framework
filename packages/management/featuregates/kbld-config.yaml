@@ -1,5 +1,13 @@
+---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
-overrides:
-- image: featuregates-controller-manager:latest
-  newImage: ""
+sources:
+  - image: featuregates-controller-manager:latest
+    path: ../../../
+    docker:
+      build:
+        file: pkg/v1/sdk/features/Dockerfile
+destinations:
+  - image: featuregates-controller-manager:latest
+    newImage: ""
+    tags: [latest]

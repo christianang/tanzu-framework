@@ -1,5 +1,13 @@
+---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
-overrides:
-- image: addons-controller:latest
-  newImage: ""
+sources:
+  - image: addons-controller:latest
+    path: ../../../
+    docker:
+      build:
+        file: addons/Dockerfile
+destinations:
+  - image: addons-controller:latest
+    newImage: ""
+    tags: [latest]

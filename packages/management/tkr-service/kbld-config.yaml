@@ -1,5 +1,13 @@
+---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
-overrides:
-- image: tkr-resolver-cluster-webhook:latest
-  newImage: ""
+sources:
+  - image: tkr-resolver-cluster-webhook:latest
+    path: ../../../
+    docker:
+      build:
+        file: pkg/v2/tkr/webhook/cluster/tkr-resolver/Dockerfile
+destinations:
+  - image: tkr-resolver-cluster-webhook:latest
+    newImage: ""
+    tags: [latest]

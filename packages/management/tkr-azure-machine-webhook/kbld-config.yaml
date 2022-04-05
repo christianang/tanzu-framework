@@ -1,5 +1,14 @@
+
+---
 apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
-overrides:
-- image: tkr-infra-machine-webhook:latest
-  newImage: ""
+sources:
+  - image: tkr-infra-machine-webhook:latest
+    path: ../../../
+    docker:
+      build:
+        file: pkg/v2/tkr/webhook/infra-machine/Dockerfile
+destinations:
+  - image: tkr-infra-machine-webhook:latest
+    newImage: ""
+    tags: [latest]
