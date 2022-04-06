@@ -7,7 +7,3 @@ sources:
     docker:
       build:
         file: pkg/v1/sdk/features/Dockerfile
-destinations:
-  - image: featuregates-controller-manager:latest
-    newImage: ""
-    tags: [latest]

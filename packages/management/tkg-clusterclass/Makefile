@@ -1,12 +1,10 @@
-# Copyright 2021 VMware, Inc. All Rights Reserved.
+# Copyright 2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-configure-package: ## Configure package before creating the package
-
-reset-package: ## Reset configured package
-
-build-and-push: export PACKAGE_NAME = tkg-clusterclass
-build-and-push: export PACKAGE_BUNDLES = $(PACKAGE_NAME)
+PACKAGE_NAME := tkg-clusterclass
+PACKAGE_VERSION := dev
+IMG_DEFAULT_TAG := dev
+IMG_VERSION_OVERRIDE ?= $(IMG_DEFAULT_TAG)
 
 ifeq ($(strip $(PACKAGE_SUB_VERSION)),)
 	PACKAGE_TAG ?= $(PACAKGE_VERSION)
@@ -14,14 +12,18 @@ else
 	PACKAGE_TAG ?= $(PACKAGE_VERSION)_$(PACKAGE_SUB_VERSION)
 endif
 
-.PHONY: build-and-push
-build-and-push: configure-package build-and-push-image reset-package
-	imgpkg push -b ${OCI_REGISTRY}/${PACKAGE_NAME}:${PACKAGE_TAG} -f bundle
+configure-package: ## Configure package before creating the package
 
-.PHONY: build-and-push-image
-build-and-push-image: configure-package kbld-build-push-image reset-package
+reset-package: ## Reset configured package
 
-.PHONY: kbld-build-push-image
-kbld-build-push-image:
+.PHONY: build-and-publish
+build-and-publish: configure-package build-and-publish-images reset-package
+	imgpkg push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
+
+.PHONY: build-and-publish-images
+build-and-publish-images:
 	mkdir -p ./bundle/.imgpkg && \
-    ../../../hack/tools/bin/kbld --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle
+	rm -f ./bundle/.imgpkg/images.yml && \
+	../../../hack/tools/bin/kbld \
+		--imgpkg-lock-output ./bundle/.imgpkg/images.yml \
+		-f bundle > /dev/null

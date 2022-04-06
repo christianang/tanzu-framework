@@ -41,13 +41,9 @@ docker-build: ## Build docker image
 docker-publish: ## Publish docker image
 	docker push $(IMG)
 
-.PHONY: kbld-image-replace
-kbld-image-replace: ## Add newImage in kbld-config.yaml
-	echo "No image in tkr-conversion package to kbld-image-replace"
-
 .PHONY: docker-image-names
 docker-image-names:
 	@echo $(IMG)
 
 .PHONY: docker-build-and-publish
-docker-build-and-publish: docker-build docker-publish kbld-image-replace
+docker-build-and-publish: docker-build docker-publish

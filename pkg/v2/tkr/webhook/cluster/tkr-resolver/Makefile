@@ -41,14 +41,9 @@ docker-build: ## Build docker image
 docker-publish: ## Publish docker image
 	docker push $(IMG)
 
-.PHONY: kbld-image-replace
-kbld-image-replace: ## Add newImage in kbld-config.yaml
-	cd ../../../../../../hack/packages/kbld-image-replace && \
-		go run main.go -kbld-config ../../../packages/management/tkr-service/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG)
-
 .PHONY: docker-image-names
 docker-image-names:
 	@echo $(IMG)
 
 .PHONY: docker-build-and-publish
-docker-build-and-publish: docker-build docker-publish kbld-image-replace
+docker-build-and-publish: docker-build docker-publish

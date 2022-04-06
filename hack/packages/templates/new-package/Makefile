@@ -1,16 +1,35 @@
-# Copyright 2021 VMware, Inc. All Rights Reserved.
+# Copyright 2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
+
+PACKAGE_NAME := TEMPLATE_PACKAGE_NAME
+PACKAGE_VERSION := dev
+IMG_DEFAULT_TAG := dev
+IMG_VERSION_OVERRIDE ?= $(IMG_DEFAULT_TAG)
+
+ifeq ($(strip $(PACKAGE_SUB_VERSION)),)
+	PACKAGE_TAG ?= $(PACAKGE_VERSION)
+else
+	PACKAGE_TAG ?= $(PACKAGE_VERSION)_$(PACKAGE_SUB_VERSION)
+endif
 
 configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
 
-build-and-push: export PACKAGE_REPOSITORY = TEMPLATE_REPO
-build-and-push: export PACKAGE_NAME = TEMPLATE_PACKAGE_NAME
-build-and-push: export PACKAGE_BUNDLES = $(PACKAGE_NAME)
+.PHONY: build-and-publish
+build-and-publish: configure-package build-and-publish-images reset-package
+	imgpkg push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
 
-.PHONY: build-and-push
-build-and-push:
-	cd ../../../ && \
-	make package-bundle && \
-	make push-package-bundles
+.PHONY: build-and-publish-images
+build-and-publish-images:
+	mkdir -p ./bundle/.imgpkg && \
+	rm -f ./bundle/.imgpkg/images.yml && \
+	../../../hack/tools/bin/ytt \
+		-f kbld-config.yaml \
+		-f kbld-config-overlay.yaml \
+		-v registry="$(OCI_REGISTRY)" \
+		-v image_tag="$(IMG_VERSION_OVERRIDE)" \
+	| ../../../hack/tools/bin/kbld \
+		--imgpkg-lock-output ./bundle/.imgpkg/images.yml \
+		-f bundle \
+		-f- > /dev/null

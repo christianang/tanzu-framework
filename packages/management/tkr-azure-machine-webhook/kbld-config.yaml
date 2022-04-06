@@ -8,7 +8,3 @@ sources:
     docker:
       build:
         file: pkg/v2/tkr/webhook/infra-machine/Dockerfile
-destinations:
-  - image: tkr-infra-machine-webhook:latest
-    newImage: ""
-    tags: [latest]

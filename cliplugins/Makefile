@@ -36,18 +36,6 @@ docker-publish-%:
 
 	docker push $(IMG_REPOSITORY)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_VERSION_OVERRIDE)
 
-.PHONY: kbld-image-replace-%
-kbld-image-replace-%: ## Add newImage in kbld-config.yaml
-	$(eval PLUGIN_NAME = $(word 1,$(subst _, ,$*)))
-	$(eval OSARCH = $(word 2,$(subst _, ,$*)))
-	$(eval OS = $(word 1,$(subst -, ,$(OSARCH))))
-	$(eval ARCH = $(word 2,$(subst -, ,$(OSARCH))))
-
-	cd ../hack/packages/kbld-image-replace && \
-	  go run main.go -kbld-config ../../../packages/management/core-management-plugins/kbld-config.yaml \
-	  $(IMG_BASEPATH)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_DEFAULT_TAG) \
-	  $(IMG_REPOSITORY)/$(PLUGIN_NAME)-$(OS)-$(ARCH):$(IMG_VERSION_OVERRIDE)
-
 .PHONY: docker-image-name-%
 docker-image-name-%:
 	$(eval PLUGIN_NAME = $(word 1,$(subst _, ,$*)))
@@ -73,14 +61,6 @@ docker-publish: ## Publish docker image
 		done \
 	done
 
-.PHONY: kbld-image-replace
-kbld-image-replace: ## Add newImage in kbld-config.yaml
-	@ for plugin in $(PLUGINS) ; do \
-		for env in $(ENVS) ; do \
-			$(MAKE) kbld-image-replace-$$plugin"_"$$env --no-print-directory ; \
-		done \
-	done
-
 .PHONY: docker-image-names
 docker-image-names: ## Return newline-separated names of all docker containers built in this package
 	@ for plugin in $(PLUGINS) ; do \
@@ -90,4 +70,4 @@ docker-image-names: ## Return newline-separated names of all docker containers b
 	done
 
 .PHONY: docker-build-and-publish
-docker-build-and-publish: docker-build docker-publish kbld-image-replace
+docker-build-and-publish: docker-build docker-publish

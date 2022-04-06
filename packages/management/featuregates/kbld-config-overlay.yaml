@@ -3,8 +3,10 @@
 
 #@overlay/match by=overlay.subset({"kind": "Config"})
 ---
+#@overlay/match missing_ok=True
 destinations:
-  #@overlay/match by=overlay.subset({"image":"featuregates-controller-manager:latest"})
-  - newImage: #@ "{}/featuregates-controller-manager".format(data.values.registry)
+  - image: featuregates-controller-manager:latest
+    newImage: #@ "{}/featuregates-controller-manager".format(data.values.registry)
     #@overlay/replace
-    tags: #@ data.values.tags
+    tags:
+      - #@ data.values.image_tag

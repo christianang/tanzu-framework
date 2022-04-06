@@ -107,16 +107,7 @@ docker-remove: ## Remove the docker image
 	docker rmi $(IMG) 2>/dev/null || true
 
 .PHONY: docker-build-and-publish
-docker-build-and-publish: docker-build docker-publish kbld-image-replace
-
-## --------------------------------------
-## Update kbld-config
-## --------------------------------------
-
-.PHONY: kbld-image-replace
-kbld-image-replace: ## Add newImage in kbld-config.yaml
-	cd ../hack/packages/kbld-image-replace && \
-	  go run main.go -kbld-config ../../../packages/management/addons-manager-v2/kbld-config.yaml $(IMG_DEFAULT_NAME_TAG) $(IMG)
+docker-build-and-publish: docker-build docker-publish
 
 ## --------------------------------------
 ## Clean
