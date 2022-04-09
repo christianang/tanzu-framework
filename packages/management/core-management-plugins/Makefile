@@ -1,15 +1,7 @@
 # Copyright 2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-NUL = /dev/null
-ifeq ($(GOHOSTOS),windows)
-	NUL = NUL
-endif
-BUILD_VERSION ?= $(shell git describe --tags --abbrev=0 2>$(NUL))
-
-ifeq ($(strip $(BUILD_VERSION)),)
-BUILD_VERSION = dev
-endif
+include ../../../common.mk
 
 PACKAGE_NAME := core-management-plugins
 PACKAGE_VERSION := dev
@@ -42,9 +34,15 @@ bundle/.imgpkg:
 clean-imagelock:
 	rm -f ./bundle/.imgpkg/images.yml
 
+.PHONY: build-plugins
+build-plugins:
+	cd ../../../ && \
+	BUILD_CLI_PLUGIN_GLOB='{cluster,tkr,feature}' make build-cli-plugins-for-core-management-package
+
 .PHONY: build-and-publish-images
-build-and-publish-images: bundle/.imgpkg clean-imagelock
+build-and-publish-images: build-plugins bundle/.imgpkg clean-imagelock
 	$(YTT) -f kbld-config-template.yaml \
 		-v registry="$(OCI_REGISTRY)" \
-		-v image_tag="$(IMG_VERSION_OVERRIDE)" | \
-	$(KBLD) --build-concurrency 1 --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle -f- > /dev/null
+		-v image_tag="$(IMG_VERSION_OVERRIDE)" \
+		-v build_version="$(BUILD_VERSION)" | \
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle -f- > /dev/null

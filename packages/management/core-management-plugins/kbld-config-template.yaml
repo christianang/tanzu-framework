@@ -23,17 +23,10 @@ kind: Config
 sources:
   #@ for/end plugin in configurations:
   - image: #@ "{}:latest".format(image_name(plugin))
-    path: ../../../
+    path: #@ "../../../artifacts/{}/{}/cli/{}/{}".format(plugin["os"], plugin["arch"], plugin["image"], data.values.build_version)
     docker:
       build:
-        file: packages/management/core-management-plugins/cliplugins/Dockerfile
-        rawOptions:
-          - "--build-arg"
-          - #@ "OS={}".format(plugin["os"])
-          - "--build-arg"
-          - #@ "ARCH={}".format(plugin["arch"])
-          - "--build-arg"
-          - #@ "PLUGIN_NAME={}".format(plugin["name"])
+        file: ../../../../../../cliplugins/Dockerfile.templates
 destinations:
   #@ for/end plugin in configurations:
   - image: #@ "{}:latest".format(image_name(plugin))
