@@ -1,9 +1,0 @@
----
-apiVersion: kbld.k14s.io/v1alpha1
-kind: Config
-sources:
-  - image: featuregates-controller-manager:latest
-    path: ../../../
-    docker:
-      build:
-        file: pkg/v1/sdk/features/Dockerfile

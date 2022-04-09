@@ -12,6 +12,9 @@ else
 	PACKAGE_TAG ?= $(PACKAGE_VERSION)_$(PACKAGE_SUB_VERSION)
 endif
 
+YTT := ../../../hack/tools/bin/ytt
+KBLD := ../../../hack/tools/bin/kbld
+
 configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
@@ -20,16 +23,16 @@ reset-package: ## Reset configured package
 build-and-publish: configure-package build-and-publish-images reset-package
 	imgpkg push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
 
+bundle/.imgpkg:
+	mkdir -p ./bundle/.imgpkg/
+
+.PHONY: clean-imagelock
+clean-imagelock:
+	rm -f ./bundle/.imgpkg/images.yml
+
 .PHONY: build-and-publish-images
-build-and-publish-images:
-	mkdir -p ./bundle/.imgpkg && \
-	rm -f ./bundle/.imgpkg/images.yml && \
-	../../../hack/tools/bin/ytt \
-		-f kbld-config.yaml \
-		-f kbld-config-overlay.yaml \
+build-and-publish-images: bundle/.imgpkg clean-imagelock
+	$(YTT) -f kbld-config-template.yaml \
 		-v registry="$(OCI_REGISTRY)" \
-		-v image_tag="$(IMG_VERSION_OVERRIDE)" \
-	| ../../../hack/tools/bin/kbld \
-		--imgpkg-lock-output ./bundle/.imgpkg/images.yml \
-		-f bundle \
-		-f- > /dev/null
+		-v image_tag="$(IMG_VERSION_OVERRIDE)" | \
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle -f- > /dev/null

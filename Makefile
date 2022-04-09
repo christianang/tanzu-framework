@@ -282,6 +282,8 @@ build-cli-%: prep-build-cli
 	$(eval ARCH = $(word 3,$(subst -, ,$*)))
 	$(eval OS = $(word 2,$(subst -, ,$*)))
 	$(eval DISCOVERY_TYPE = $(word 1,$(subst -, ,$*)))
+	$(eval PLUGIN_NAME = $(word 4,$(subst -, ,$*)))
+	$(if $(PLUGIN_NAME),$(eval PLUGIN_MATCH = $(PLUGIN_NAME)),$(eval PLUGIN_MATCH = "*"))
 
 	@if [ "$(filter $(OS)-$(ARCH),$(ENVS))" = "" ]; then\
 		printf "\n\n======================================\n";\
@@ -289,9 +291,9 @@ build-cli-%: prep-build-cli
 		printf "! Make sure to perform a full build to make sure expected plugins are available!\n";\
 		printf "======================================\n\n";\
 	fi
-
+	ls -la
 	./hack/embed-pinniped-binary.sh go ${OS} ${ARCH} ${PINNIPED_VERSIONS}
-	$(GO) run ./cmd/cli/plugin-admin/builder/main.go cli compile --version $(BUILD_VERSION) --ldflags "$(LD_FLAGS) -X 'github.com/vmware-tanzu/tanzu-framework/pkg/v1/config.DefaultStandaloneDiscoveryType=${DISCOVERY_TYPE}'" --tags "${BUILD_TAGS}" --corepath "cmd/cli/tanzu" --artifacts artifacts/${OS}/${ARCH}/cli --target  ${OS}_${ARCH}
+	$(GO) run ./cmd/cli/plugin-admin/builder/main.go cli compile --version $(BUILD_VERSION) --ldflags "$(LD_FLAGS) -X 'github.com/vmware-tanzu/tanzu-framework/pkg/v1/config.DefaultStandaloneDiscoveryType=${DISCOVERY_TYPE}'" --tags "${BUILD_TAGS}" --corepath "cmd/cli/tanzu" --artifacts artifacts/${OS}/${ARCH}/cli --target  ${OS}_${ARCH} --match $(PLUGIN_MATCH)
 
 ## --------------------------------------
 ##@ Build locally

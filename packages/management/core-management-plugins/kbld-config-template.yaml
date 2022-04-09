@@ -1,0 +1,43 @@
+#@ load("@ytt:data", "data")
+
+#@ configurations = [
+#@   { "os": "linux",   "arch": "amd64", "name": "cluster", "image": "cluster"},
+#@   { "os": "linux",   "arch": "amd64", "name": "tkr",     "image": "kubernetes-release"},
+#@   { "os": "linux",   "arch": "amd64", "name": "feature", "image": "feature"},
+
+#@   { "os": "darwin",  "arch": "amd64", "name": "cluster", "image": "cluster"},
+#@   { "os": "darwin",  "arch": "amd64", "name": "tkr",     "image": "kubernetes-release"},
+#@   { "os": "darwin",  "arch": "amd64", "name": "feature", "image": "feature"},
+
+#@   { "os": "windows", "arch": "amd64", "name": "cluster", "image": "cluster"},
+#@   { "os": "windows", "arch": "amd64", "name": "tkr",     "image": "kubernetes-release"},
+#@   { "os": "windows", "arch": "amd64", "name": "feature", "image": "feature"},
+#@ ]
+
+#@ def image_name(plugin):
+#@   return "tanzu-cli-plugins/{}-{}-{}".format(plugin["image"], plugin["os"], plugin["arch"])
+#@ end
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Config
+sources:
+  #@ for/end plugin in configurations:
+  - image: #@ "{}:latest".format(image_name(plugin))
+    path: ../../../
+    docker:
+      build:
+        file: packages/management/core-management-plugins/cliplugins/Dockerfile
+        rawOptions:
+          - "--build-arg"
+          - #@ "OS={}".format(plugin["os"])
+          - "--build-arg"
+          - #@ "ARCH={}".format(plugin["arch"])
+          - "--build-arg"
+          - #@ "PLUGIN_NAME={}".format(plugin["name"])
+destinations:
+  #@ for/end plugin in configurations:
+  - image: #@ "{}:latest".format(image_name(plugin))
+    newImage: #@ "{}/{}".format(data.values.registry, image_name(plugin))
+    #@overlay/replace
+    tags:
+      - #@ data.values.image_tag
