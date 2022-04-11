@@ -18,7 +18,7 @@ import (
 	"github.com/vmware-tanzu/tanzu-framework/hack/packages/package-tools/utils"
 )
 
-var packageRepository, version, subVersion, localRegistryURL string
+var packageRepository, version, subVersion, imageVersion, localRegistryURL, destinationRegistryURL string
 var all bool
 
 // packageBundleGenerateCmd is for generating package bundle
@@ -33,11 +33,14 @@ func init() {
 	packageBundleGenerateCmd.Flags().StringVar(&packageRepository, "repository", "", "Package repository of the package bundle being created")
 	packageBundleGenerateCmd.Flags().StringVar(&version, "version", "", "Package bundle version")
 	packageBundleGenerateCmd.Flags().StringVar(&subVersion, "sub-version", "", "Package bundle subversion")
+	packageBundleGenerateCmd.Flags().StringVar(&imageVersion, "image-version", "dev", "The version of the docker images within the package.")
 	packageBundleGenerateCmd.Flags().StringVar(&localRegistryURL, "local-registry-url", "", "Local registry URL for sha256 values")
+	packageBundleGenerateCmd.Flags().StringVar(&destinationRegistryURL, "destination-registry-url", "", "Destination registry URL for docker images.")
 	packageBundleGenerateCmd.Flags().BoolVar(&all, "all", false, "Generate all package bundles in a repository")
-	packageBundleGenerateCmd.MarkFlagRequired("repository")       //nolint: errcheck
-	packageBundleGenerateCmd.MarkFlagRequired("version")          //nolint: errcheck
-	packageBundleGenerateCmd.MarkFlagRequired("localRegistryURL") //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("repository")             //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("version")                //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("localRegistryURL")       //nolint: errcheck
+	packageBundleGenerateCmd.MarkFlagRequired("destinationRegistryURL") //nolint: errcheck
 }
 
 func runPackageBundleGenerate(cmd *cobra.Command, args []string) error {
@@ -93,20 +96,27 @@ func generateSingleImgpkgLockOutput(toolsBinDir, packagePath string) error {
 		return err
 	}
 
+	if err := os.Remove(filepath.Join(imgpkgLockOutputDir, "images.yml")); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
 	// run the ytt command on the package config and pipe the output to kbld command to generate imgpkg lock output file
-	yttCmd := exec.Command(filepath.Join(toolsBinDir, "ytt"),
+	yttArgs := []string{
 		"--ignore-unknown-comments",
-		"-f", filepath.Join(packagePath, "bundle", "config")) // #nosec G204
+		"-v", fmt.Sprintf("registry=%s", destinationRegistryURL),
+		"-v", fmt.Sprintf("image_tag=%s", imageVersion),
+	}
 
-	kbldArgs := []string{
+	if _, err := os.Stat(filepath.Join(packagePath, "kbld-config-template.yaml")); err == nil {
+		yttArgs = append(yttArgs, "-f", filepath.Join(packagePath, "kbld-config-template.yaml"))
+	}
+
+	yttCmd := exec.Command(filepath.Join(toolsBinDir, "ytt"), yttArgs...) // #nosec G204
+
+	kbldCmd := exec.Command(filepath.Join(toolsBinDir, "kbld"),
+		"-f", filepath.Join(packagePath, "bundle", "config"),
 		"-f", "-",
-		"--imgpkg-lock-output", filepath.Join(imgpkgLockOutputDir, "images.yml"),
-	}
-	if _, err := os.Stat(filepath.Join(packagePath, "kbld-config.yaml")); err == nil {
-		kbldArgs = append(kbldArgs, "-f", filepath.Join(packagePath, "kbld-config.yaml"))
-	}
-
-	kbldCmd := exec.Command(filepath.Join(toolsBinDir, "kbld"), kbldArgs...) // #nosec G204
+		"--imgpkg-lock-output", filepath.Join(imgpkgLockOutputDir, "images.yml")) // #nosec G204
 
 	pipe, err := yttCmd.StdoutPipe()
 	if err != nil {

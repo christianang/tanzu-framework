@@ -697,11 +697,11 @@ prep-package-tools:
 
 .PHONY: package-bundle
 package-bundle: $(IMGPKG) prep-package-tools ## Build one specific tar bundle package, needs PACKAGE_NAME VERSION
-	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate $(PACKAGE_NAME) --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION) --local-registry-url=$(LOCAL_REGISTRY_URL)
+	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate $(PACKAGE_NAME) --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION) --local-registry-url=$(LOCAL_REGISTRY_URL) --destination-registry-url=$(LOCAL_REGISTRY_URL)
 
 .PHONY: package-bundles
 package-bundles: $(IMGPKG) prep-package-tools ## Build tar bundles for multiple packages
-	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate --all --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION) --local-registry-url=$(LOCAL_REGISTRY_URL)
+	cd hack/packages/package-tools && $(GO) run main.go package-bundle generate --all --repository=$(PACKAGE_REPOSITORY) --version=$(PACKAGE_VERSION) --sub-version=$(PACKAGE_SUB_VERSION) --local-registry-url=$(LOCAL_REGISTRY_URL) --destination-registry-url=$(LOCAL_REGISTRY_URL)
 
 .PHONY: package-repo-bundle
 package-repo-bundle: $(YQ) $(YTT) $(KBLD) $(IMGPKG) prep-package-tools ## Build tar bundles for package repo with given package-values.yaml file
