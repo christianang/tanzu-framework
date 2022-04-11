@@ -1,9 +1,0 @@
----
-apiVersion: kbld.k14s.io/v1alpha1
-kind: Config
-sources:
-  - image: addons-controller:latest
-    path: ../../../
-    docker:
-      build:
-        file: addons/Dockerfile

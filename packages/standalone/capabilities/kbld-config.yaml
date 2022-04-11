@@ -1,9 +1,0 @@
----
-apiVersion: kbld.k14s.io/v1alpha1
-kind: Config
-sources:
-  - image: capabilities-controller-manager:latest
-    path: ../../../
-    docker:
-      build:
-        file: pkg/v1/sdk/capabilities/Dockerfile

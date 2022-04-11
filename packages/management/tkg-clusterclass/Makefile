@@ -12,6 +12,8 @@ else
 	PACKAGE_TAG ?= $(PACKAGE_VERSION)_$(PACKAGE_SUB_VERSION)
 endif
 
+KBLD := ../../../hack/tools/bin/kbld
+
 configure-package: ## Configure package before creating the package
 
 reset-package: ## Reset configured package
@@ -20,10 +22,13 @@ reset-package: ## Reset configured package
 build-and-publish: configure-package build-and-publish-images reset-package
 	imgpkg push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
 
+bundle/.imgpkg:
+	mkdir -p ./bundle/.imgpkg/
+
+.PHONY: clean-imagelock
+clean-imagelock:
+	rm -f ./bundle/.imgpkg/images.yml
+
 .PHONY: build-and-publish-images
-build-and-publish-images:
-	mkdir -p ./bundle/.imgpkg && \
-	rm -f ./bundle/.imgpkg/images.yml && \
-	../../../hack/tools/bin/kbld \
-		--imgpkg-lock-output ./bundle/.imgpkg/images.yml \
-		-f bundle > /dev/null
+build-and-publish-images: bundle/.imgpkg clean-imagelock
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle > /dev/null
