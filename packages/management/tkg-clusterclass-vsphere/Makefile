@@ -32,4 +32,4 @@ clean-imagelock:
 
 .PHONY: build-and-publish-images
 build-and-publish-images: bundle/.imgpkg clean-imagelock
-	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle > /dev/null
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle/config > /dev/null

@@ -36,4 +36,4 @@ build-and-publish-images: bundle/.imgpkg clean-imagelock
 	$(YTT) -f kbld-config-template.yaml \
 		-v registry="$(OCI_REGISTRY)" \
 		-v image_tag="$(IMG_VERSION_OVERRIDE)" | \
-	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle -f- > /dev/null
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle/config -f- > /dev/null

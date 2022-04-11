@@ -46,4 +46,4 @@ build-and-publish-images: build-plugins bundle/.imgpkg clean-imagelock
 		-v registry="$(OCI_REGISTRY)" \
 		-v image_tag="$(IMG_VERSION_OVERRIDE)" \
 		-v build_version="$(BUILD_VERSION)" | \
-	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle -f- > /dev/null
+	$(KBLD) --imgpkg-lock-output ./bundle/.imgpkg/images.yml -f bundle/config -f- > /dev/null
