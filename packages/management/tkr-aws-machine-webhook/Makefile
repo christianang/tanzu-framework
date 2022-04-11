@@ -14,6 +14,7 @@ endif
 
 YTT := ../../../hack/tools/bin/ytt
 KBLD := ../../../hack/tools/bin/kbld
+IMGPKG := ../../../hack/tools/bin/imgpkg
 
 configure-package: ## Configure package before creating the package
 
@@ -21,7 +22,7 @@ reset-package: ## Reset configured package
 
 .PHONY: build-and-publish
 build-and-publish: configure-package build-and-publish-images reset-package
-	imgpkg push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
+	$(IMGPKG) push -b $(OCI_REGISTRY)/$(PACKAGE_NAME):$(PACKAGE_TAG) -f bundle
 
 bundle/.imgpkg:
 	mkdir -p ./bundle/.imgpkg/
