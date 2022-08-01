@@ -8,7 +8,7 @@
 #@ assert.fail("TKG_IP_FAMILY value must be \"ipv6\", \"ipv4\", \"ipv4,ipv6\", \"ipv6,ipv4\", or unset")
 #@ end
 
-#@ if data.values.TKG_IP_FAMILY in ["ipv6", "ipv4,ipv6", "ipv6,ipv4"] and data.values.PROVIDER_TYPE != "vsphere":
+#@ if data.values.TKG_IP_FAMILY in ["ipv6", "ipv4,ipv6", "ipv6,ipv4"] and data.values.PROVIDER_TYPE not in ["vsphere", "docker"]:
 #@ assert.fail("TKG_IP_FAMILY value contains \"ipv6\". IPv6 is only compatible with PROVIDER_TYPE \"vsphere\". Please set INFRASTRUCTURE_PROVIDER to a compatible value.")
 #@ end
 

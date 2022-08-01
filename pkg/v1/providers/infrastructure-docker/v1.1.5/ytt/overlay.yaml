@@ -94,8 +94,24 @@ spec:
       dns:
         imageRepository: #@ kubeadm_image_repo(bomDataForK8sVersion.kubeadmConfigSpec.dns.imageRepository)
         imageTag: #@ bomDataForK8sVersion.kubeadmConfigSpec.dns.imageTag
-    #@ if data.values.CNI == "antrea":
+    #@ if data.values.TKG_IP_FAMILY == "ipv6":
+    initConfiguration:
+      #@overlay/match missing_ok=True
+      localAPIEndpoint:
+        advertiseAddress: "::"
+        bindPort: 6443
+      nodeRegistration:
+        kubeletExtraArgs:
+          #@overlay/match missing_ok=True
+          node-ip: "::"
+    joinConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+          #@overlay/match missing_ok=True
+          node-ip: "::"
+    #@ end
     preKubeadmCommands:
+    #@ if data.values.CNI == "antrea":
     #! disable TX hardware checksum offload for the veth interface of each Kind Node
     #! https://github.com/vmware-tanzu/antrea/blob/master/docs/kind.md#why-is-the-yaml-manifest-different-when-using-kind
     #@overlay/append
@@ -104,6 +120,12 @@ spec:
     - #@ construct_pre_kubeadm_command()
     #@overlay/append
     - sysctl -w net.ipv4.tcp_retries2=4
+    #@ end
+    #@ if data.values.TKG_IP_FAMILY == "ipv6":
+    #@overlay/append
+    - sysctl -w net.ipv6.conf.all.disable_ipv6=0
+    #@overlay/append
+    - sysctl -w net.ipv6.conf.all.forwarding=1
     #@ end
   replicas: #@ data.values.CONTROL_PLANE_MACHINE_COUNT
   version: #@ data.values.KUBERNETES_VERSION
@@ -125,11 +147,23 @@ apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
   name: #@ "{}-md-0".format(data.values.CLUSTER_NAME)
-#@ if data.values.CNI == "antrea":
 spec:
   template:
     spec:
+      #@ if data.values.TKG_IP_FAMILY == "ipv6":
+      initConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            #@overlay/match missing_ok=True
+            node-ip: "::"
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            #@overlay/match missing_ok=True
+            node-ip: "::"
+      #@ end
       preKubeadmCommands:
+      #@ if data.values.CNI == "antrea":
       #! disable TX hardware checksum offload for the veth interface of each Kind Node
       #! https://github.com/vmware-tanzu/antrea/blob/master/docs/kind.md#why-is-the-yaml-manifest-different-when-using-kind
       #@overlay/append
@@ -138,7 +172,13 @@ spec:
       - #@ construct_pre_kubeadm_command()
       #@overlay/append
       - sysctl -w net.ipv4.tcp_retries2=4
-#@ end
+      #@ end
+      #@ if data.values.TKG_IP_FAMILY == "ipv6":
+      #@overlay/append
+      - sysctl -w net.ipv6.conf.all.disable_ipv6=0
+      #@overlay/append
+      - sysctl -w net.ipv6.conf.all.forwarding=1
+      #@ end
 
 
 #@overlay/match by=overlay.subset({"kind":"MachineDeployment"})
